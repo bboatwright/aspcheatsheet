@@ -1,5 +1,4 @@
 declare -a imglist=('*.IMG')
-#echo ${imglist[*]}
 
 c=1
 for imgstring in $imglist
@@ -14,6 +13,5 @@ done
 
 imgnameout1=${imgnameout[1]}
 imgnameout2=${imgnameout[2]}
-#echo $imgnameout1 $imgnameout2
 
-~/StereoPipeline-2.6.2-2019-06-17-x86_64-Linux/bin/cam2map4stereo.py "$imgnameout1".cal.cub "$imgnameout2".cal.cub
+cam2map4stereo.py "$imgnameout1".cal.cub "$imgnameout2".cal.cub
