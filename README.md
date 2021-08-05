@@ -50,7 +50,7 @@ Use a blending length of 20 pixels for smoother transitions between higher-resol
 wget -r -l1 -np first_image_directory -A “*RED*IMG”
 wget -r -l1 -np second_image_directory -A “*RED*IMG”
 ```
-PDS directory: `https://hirise.lpl.arizona.edu/PDS/EDR/*SP/ORB_****00_****99/*SP_******_****`
+PDS directory: `https://hirise.lpl.arizona.edu/PDS/EDR/[E/P]SP/ORB_****00_****99/[E/P]SP_******_****`
 
 These wget options will generate a nested directory that contains all the HiRISE red detector images for each EDR. *Optional: Copy image directories to root directory for easier access (and less typing).*
 ```
