@@ -47,8 +47,8 @@ Use a blending length of 20 pixels for smoother transitions between higher-resol
 
 ## Calibrating HiRISE images
 ```
-wget -r -l1 -np <first_image_directory> -A “*RED*IMG”
-wget -r -l1 -np <second_image_directory> -A “*RED*IMG”
+wget -r -l1 -np first_image_directory -A “*RED*IMG”
+wget -r -l1 -np second_image_directory -A “*RED*IMG”
 ```
 PDS directory: `https://hirise.lpl.arizona.edu/PDS/EDR/*SP/ORB_****00_****99/*SP_******_****`
 
