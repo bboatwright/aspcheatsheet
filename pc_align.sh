@@ -9,5 +9,3 @@ pc_align --max-displacement 1000 --save-transformed-source-points mola128_stereo
 point2dem --tr 20 "$tifname"-trans_source.tif
 c=$(($c+1))
 done
-
-
