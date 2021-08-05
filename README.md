@@ -15,7 +15,7 @@ PDS directory: `https://pds-imaging.jpl.nasa.gov/data/mro/mars_reconnaissance_or
 ```
 stereo first_image.map.cub second_image.map.cub point_cloud_name
 ```
-Use `stereo_gui` if you want to process a smaller section of the image. Generates pyramid tiles that can be reused later. Click+drag to zoom, Ctrl+click+drag to select processing extent, r to run.
+Use `stereo_gui` if you want to process a smaller section of the image. Generates pyramid tiles that can be reused later. Click+drag to zoom, Ctrl+click+drag to select processing extent, r to run. The `stereo.default` provided in this repository works nicely with the preprocessed images at this step.
 ```
 point2dem -r D_MARS --tr 20 point_cloud_name-PC.tif
 ```
