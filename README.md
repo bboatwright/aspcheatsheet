@@ -17,9 +17,9 @@ Make sure you're downloading the raw experimental data record (EDR) IMG files, n
 ```
 stereo -s stereo.map <img1>.map.cub <img2>.map.cub <output>
 ```
-The ASP command `stereo` takes the argument `-s stereo.map` for the config file of the same name. This file was originally available from Mayer (2018) but has now been archived [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/ctx_map_disp_filter_7_13_0.13.stereo). It uses an optimized median filter size of 7, texture smoothing size of 13, and texture smoothing scale of 0.13. The `stereo` command takes the map-projected image cubes and performs stereo correlation to generate an initial point cloud.
+The ASP command `stereo` takes the argument `-s stereo.map` for the config file of the same name. This file uses a CTX-optimized median filter and was originally available from Mayer (2018) but has now been archived [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/ctx_map_disp_filter_7_13_0.13.stereo). Users may also want to try using a config file without the median filter [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/ctx_map.stereo). I've found that using the stereo.default file gives adequate results for most purposes; just make sure that alignment-method is set to "none" when using map-projected image cubes.
 
-Use `stereo_gui` if you want to process a smaller section of the image. This generates pyramid tiles that can be reused later. Click+drag to zoom, Ctrl+click+drag to select processing extent, r to run.
+The `stereo` command takes the map-projected image cubes and performs stereo correlation to generate an initial point cloud. Use `stereo_gui` if you want to process a smaller section of the image. This generates pyramid tiles that can be reused later. Click+drag to zoom, Ctrl+click+drag to select processing extent, r to run.
 ```
 point2dem --tr 20 *PC.tif
 dem_geoid *DEM.tif
