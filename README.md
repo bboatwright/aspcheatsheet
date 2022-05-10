@@ -17,7 +17,7 @@ Make sure you're downloading the raw experimental data record (EDR) IMG files, n
 ```
 stereo -s stereo.map <img1>.map.cub <img2>.map.cub <output>
 ```
-The ASP command `stereo` takes the argument `-s stereo.map` for the config file of the same name. This file is available from [Mayer (2018)](https://github.com/USGS-Astrogeology/asp_scripts/blob/master/config/ctx_map_disp_filter_7_13_0.13.stereo) and uses an optimized median filter size of 7, texture smoothing size of 13, and texture smoothing scale of 0.13. The `stereo` command takes the map-projected image cubes and performs stereo correlation to generate an initial point cloud.
+The ASP command `stereo` takes the argument `-s stereo.map` for the config file of the same name. This file was originally available from Mayer (2018) but has now been archived [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/ctx_map_disp_filter_7_13_0.13.stereo). It uses an optimized median filter size of 7, texture smoothing size of 13, and texture smoothing scale of 0.13. The `stereo` command takes the map-projected image cubes and performs stereo correlation to generate an initial point cloud.
 
 Use `stereo_gui` if you want to process a smaller section of the image. This generates pyramid tiles that can be reused later. Click+drag to zoom, Ctrl+click+drag to select processing extent, r to run.
 ```
