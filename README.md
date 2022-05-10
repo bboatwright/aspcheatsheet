@@ -1,49 +1,54 @@
 # Ames Stereo Pipeline (ASP) and Desktop Exploration of Remote Terrain (DERT) for CTX & HiRISE
-A cheat sheet with shell scripts for generating stereo topography models from Context Camera (CTX) and High Resolution Imaging Science Experiment (HiRISE) image data. Everything below assumes you've already installed and compiled ASP and USGS ISIS, which is required to calibrate the raw images. See the [Ames Stereo Pipeline](github.com/NeoGeographyToolkit/StereoPipeline) and [USGS ISIS](https://github.com/USGS-Astrogeology/ISIS3) repositories. If you're planning to use your stereo products with ArcGIS on Windows, I've found the easiest all-in-one setup is a Linux virtual machine. I use [VirtualBox](https://www.virtualbox.org/) with [Ubuntu Desktop](https://ubuntu.com/download/desktop), but any combination of VM and reasonably modern build of Linux should suffice. [DERT](https://github.com/nasa/DERT) is another Linux-based application that in my opinion has far superior functionality to ArcScene for 3D visualization.
+A cheat sheet with shell scripts for generating stereo topography models from Context Camera (CTX) and High Resolution Imaging Science Experiment (HiRISE) image data. You'll first need to install and compile both ASP and USGS ISIS. See the [Ames Stereo Pipeline](https://github.com/NeoGeographyToolkit/StereoPipeline) and [USGS ISIS](https://github.com/USGS-Astrogeology/ISIS3) repositories. If you're planning to use your stereo products with ArcGIS on Windows, I've found the easiest all-in-one setup is a Linux virtual machine. I use [VirtualBox](https://www.virtualbox.org/) with [Ubuntu Desktop](https://ubuntu.com/download/desktop), but any combination of VM and reasonably modern build of Linux should suffice. You may also choose to have your stereo pipeline setup on a separate Unix-based machine or partition. [DERT](https://github.com/nasa/DERT) is another Unix-based application that in my opinion has far superior functionality to ArcScene for 3D visualization.
 
 Generally try to choose two images with similar lighting conditions. Avoid images with obvious artifacts (stripes or bad data), poor contrast, or harsh shadows. To find good images, I usually use [Mars Orbital Data Explorer](https://ode.rsl.wustl.edu/mars/indexMapSearch.aspx) for CTX or the [HiRISE Browse Map](https://www.uahirise.org/hiwish/browse). HiRISE also maintains a (non-exhaustive) [list of stereo pairs](https://www.uahirise.org/stereo/). You can also request stereo pairs or completions in [HiWish](https://www.uahirise.org/hiwish/).
 
 ## Generating a CTX stereo DEM
-*Hint: Make a separate directory for every stereo pair – ASP generates a lot of files.*
+*The syntax of the code used below assumes all assets are located in the same directory. Other configurations can be accommodated by changing the paths to each filename.*
 ```
 wget first_image.IMG
 wget second_image.IMG
 ```
 PDS directory: `https://pds-imaging.jpl.nasa.gov/data/mro/mars_reconnaissance_orbiter/ctx/mrox_****/data/***_******_****_X[I/N]_**[N/S]***[E/W].IMG`
 
+Make sure you're downloading the raw experimental data record (EDR) IMG files, not the derived GeoTIFFs or other formats. This is necessary for processing by ISIS. 
+
 `./preprocess.sh` will process the two IMG files into map-projected ISIS CUB files. Make sure these are the only two IMG files in your directory.
 ```
-stereo first_image.map.cub second_image.map.cub point_cloud_name
+stereo -s stereo.map <img1>.map.cub <img2>.map.cub <output>
 ```
-Use `stereo_gui` if you want to process a smaller section of the image. Generates pyramid tiles that can be reused later. Click+drag to zoom, Ctrl+click+drag to select processing extent, r to run. The `stereo.default` provided in this repository works nicely with the preprocessed images at this step.
-```
-point2dem -r D_MARS --tr 20 point_cloud_name-PC.tif
-```
-Specify datum as D_MARS is you want to match the Mars 2000 geographic coordinate system in ArcMap. 20 m/pix resolution averages the raw point cloud over 4x4 areas, significantly reducing DEM noise. The 2^2 difference in resolution between the DEM and original images also allows you to import everything into DERT without having to resample.
-```
-dem_geoid point_cloud_name-DEM.tif
-```
-Scales DEM values to elevations above the datum. Exports to `point_cloud_name-DEM-adj.tif`, which can be imported to ArcMap.
+The ASP command `stereo` takes the argument `-s stereo.map` for the config file of the same name. This file is available from [Mayer (2018)](https://github.com/USGS-Astrogeology/asp_scripts/blob/master/config/ctx_map_disp_filter_7_13_0.13.stereo) and uses an optimized median filter size of 7, texture smoothing size of 13, and texture smoothing scale of 0.13. The `stereo` command takes the map-projected image cubes and performs stereo correlation to generate an initial point cloud.
 
-## Mosaicking individual CTX DEMs
-Compile adjusted CTX DEMs in a single directory.
+Use `stereo_gui` if you want to process a smaller section of the image. This generates pyramid tiles that can be reused later. Click+drag to zoom, Ctrl+click+drag to select processing extent, r to run.
 ```
-dem_mosaic first_point_cloud_name-DEM-adj.tif … last_point_cloud_name-DEM-adj.tif -o CTX_mosaic_name
+point2dem --tr 20 *PC.tif
+dem_geoid *DEM.tif
 ```
-Each pixel of the mosaic will take the value of the first DEM in the list that covers that location. This combines the individual CTX DEMs into a single map-projected DEM.
+The ASP commands `point2dem` and `dem_geoid` convert the point cloud to a digital elevation model (DEM) and correct the elevation values in the DEM to the Mars reference spheroid (R = 3,396,190 m), respectively. `point2dem` takes the argument `--tr 20` to specify the desired resolution of the final DEM of 20 m/pix. This is the default value to make the files easier to import into DERT, which requires stacked images to have relative dimensions in powers of 2; thus, the DEMs are 1/4 the resolution of the original CTX images (5 m/pix). DEMs can be generated at other resolutions according to user preference.
 
-## Filling gaps in CTX mosaics with MOLA
-Add a MOLA tile to the same directory as the adjusted CTX DEMs.
+`dem_geoid` exports to `<output>-DEM-adj.tif`, which can be used in ArcMap.
 
-`./pc_align.sh` registers each DEM with the MOLA tile and outputs `point_cloud_name-trans_source-DEM.tif` (no need to redo the datum adjustment). 
+The above process can be fully automated by running `sbatch run_asp` in a SLURM workload manager.
+
+## Mosaicking and filling gaps with MOLA
+*The syntax of the code used below assumes all assets are located in a DIFFERENT directory than those used for the individual stereo runs above. Other configurations can be accommodated by changing the paths to each filename.*
+
+Oftentimes ASP stereo DEMs will have holes or bad data values. One workaround is to mosaic the ASP DEMs over a tile extracted from a lower-resolution dataset. Make sure to copy all of your previously processed, geoid-adjusted DEMs, as well as your background tile, into a single directory. A list of the post-alignment DEMs in top-down mosaic order (files ending in `trans_source-DEM.tif`) should be provided by the user in `mosaic_order.lis` in the same directory.
+
+Two versions of a similar script are provided: `pc_align_global.sh` performs a simple alignment between each CTX DEM and a background MOLA tile with no further adjustments, and is ideal for integration with the full background dataset; `pc_align_local.sh` performs additional steps to horizontally shift the background tile to more closely match the CTX DEMs, and is ideal for comparing topographic information directly to corresponding CTX visible images over a limited area or for export to 3-D visualization software such as DERT. The examples below are from the global script but are also used in the local script.
 ```
-dem_mosaic first_point_cloud_name-trans_source-DEM.tif … last_point_cloud_name-trans_source-DEM.tif -o CTX_mosaic_name
+pc_align --max-displacement 1000 --save-transformed-source-points <tile>.tif "$tifname"-DEM-adj.tif -o "$tifname"
 ```
-Each pixel of the mosaic will take the value of the first DEM in the list that covers that location. This combines the individual CTX DEMs into a single map-projected DEM. You can also do this without the last step to make sure there are no disparities in elevations between overlapping areas (generally a good idea).
+The ASP command `pc_align` uses an initial transform to obtain the correct vertical offset between each CTX DEM and the background tile. The local script uses this offset to perform an additional manual alignment on the original DEM source files.
 ```
-dem_mosaic --priority-blending-length 20 CTX_mosaic_name-tile-0.tif mola_tile_name.tif -o combined_mosaic_name
+dem_mosaic -l mosaic_order.lis -o ctx_mosaic
+dem_mosaic --priority-blending-length 20 ctx_mosaic-tile-0.tif <tile>.tif -o ctx_mosaic_global
 ```
-Use a blending length of 20 pixels for smoother transitions between higher-resolution CTX and lower-resolution MOLA pixels. MOLA pixels are automatically interpolated to the CTX DEM resolution. Exports to `combined_mosaic_name-tile-0.tif`, which can be imported to ArcMap.
+The ASP command `dem_mosaic` first mosaics the background-registered DEMs together, and then the combined CTX DEM mosaic with the background tile. In the second step, the argument `--priority-blending-length 20` is used to specify that gaps in the CTX DEM mosaic should be filled with the lower-resolution tile and blended over a distance of 20 pixels, which is avoided in the first step to maintain as much of the original high-resolution data as possible.
+
+`dem_mosaic` steps exports to either `ctx_mosaic_global-tile-0.tif` or `ctx_mosaic_local-tile-0.tif`, which can be used in ArcMap.
+
+Either script can be fully automated by running `sbatch run_mosaic` in a SLURM workload manager and commenting out `#` the unwanted version of the script.
 
 ## Calibrating HiRISE images
 ```
