@@ -17,7 +17,7 @@ Make sure you're downloading the raw experimental data record (EDR) IMG files, n
 ```
 stereo -s stereo.map <img1>.map.cub <img2>.map.cub <output>
 ```
-The ASP command `stereo` takes the argument `-s stereo.map` for the config file of the same name. This file uses a CTX-optimized median filter and was originally available from Mayer (2018) but has now been archived [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/ctx_map_disp_filter_7_13_0.13.stereo). Users may also want to try using a config file without the median filter [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/ctx_map.stereo). I've found that using stereo.default gives adequate results for most purposes; just make sure that alignment-method is set to "none" when using map-projected image cubes.
+The ASP command `stereo` takes the argument `-s stereo.map` for the config file of the same name. This file uses a CTX-optimized median filter and was originally available from Mayer (2018) but has now been archived [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/ctx_map_disp_filter_7_13_0.13.stereo). Users may also want to try using a config file without the median filter [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/ctx_map.stereo). I've found that `stereo.default` gives adequate results for most purposes; just make sure to set `alignment-method none` when using map-projected image cubes.
 
 The `stereo` command takes the map-projected image cubes and performs stereo correlation to generate an initial point cloud. Use `stereo_gui` if you want to process a smaller section of the image. This generates pyramid tiles that can be reused later. Click+drag to zoom, Ctrl+click+drag to select processing extent, r to run.
 ```
@@ -52,19 +52,19 @@ Either script can be fully automated by running `sbatch run_mosaic` in a SLURM w
 
 ## Calibrating HiRISE images
 ```
-wget -r -l1 -np first_image_directory -A “*RED*IMG”
-wget -r -l1 -np second_image_directory -A “*RED*IMG”
+wget -r -l1 -nd first_image_directory -A “*RED*IMG”
+wget -r -l1 -nd second_image_directory -A “*RED*IMG”
 ```
 PDS directory: `https://hirise.lpl.arizona.edu/PDS/EDR/[E/P]SP/ORB_****00_****99/[E/P]SP_******_****`
 
-These wget options will generate a nested directory that contains all the HiRISE red detector images for each EDR. *Optional: Copy image directories to root directory for easier access (and less typing).*
+These wget options will download all the HiRISE red detector images for each EDR into a single directory. If you'd rather have them save as nested directories, use the `-np` option instead of `-nd`.
 ```
-hiedr2mosaic.py first_image_directory/*
-hiedr2mosaic.py second_image_directory/*
+hiedr2mosaic.py <dir1>*
+hiedr2mosaic.py <dir2>*
 ```
-The `hiedr2mosaic.py` program automates a number of processing steps to combine the data from the different HiRISE detectors into a single image. The /* wildcard operator ensures all the files in the directory are included.
+The `hiedr2mosaic.py` program automates a number of processing steps to combine the data from the different HiRISE detectors into a single image. The * wildcard after the directory name ensures all the files from the different detectors are included.
 ```
-cam2map4stereo.py first_image_name.mos_hijitreged.norm.cub second_image_name.mos_hijitreged.norm.cub
+cam2map4stereo.py <dir1>_RED.mos_hijitreged.norm.cub <dir2>_RED.mos_hijitreged.norm.cub
 ```
 Proceed as above for CTX, starting after the `./preprocess.sh`. For 25 cm/pix images, use --tr 1; for 50 cm/pix, use --tr 2 in point2dem.
 
