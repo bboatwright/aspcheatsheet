@@ -1,0 +1,11 @@
+#!/bin/bash
+#SBATCH -J stereo_map
+#SBATCH -t 48:00:00
+#SBATCH --mem=16G
+#SBATCH -o asp_out
+#SBATCH -e asp_error
+
+./preprocess.sh
+stereo -s stereo.map <img1>*map.cub <img2>*map.cub <output>
+point2dem --tr 20 *PC.tif
+dem_geoid *DEM.tif
