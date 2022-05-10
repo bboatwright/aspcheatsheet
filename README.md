@@ -6,8 +6,8 @@ Generally try to choose two images with similar lighting conditions. Avoid image
 ## Generating a CTX stereo DEM
 *The syntax of the code used below assumes all assets are located in the same directory. Other configurations can be accommodated by changing the paths to each filename.*
 ```
-wget first_image.IMG
-wget second_image.IMG
+wget <img1>.IMG
+wget <img2>.IMG
 ```
 PDS directory: `https://pds-imaging.jpl.nasa.gov/data/mro/mars_reconnaissance_orbiter/ctx/mrox_****/data/***_******_****_X[I/N]_**[N/S]***[E/W].IMG`
 
