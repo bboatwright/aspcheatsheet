@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J stereo_hirise_map
-#SBATCH -t 7:00:00:00
+#SBATCH -t 120:00:00
 #SBATCH --mem=16G
 #SBATCH -o asp_out
 #SBATCH -e asp_error
