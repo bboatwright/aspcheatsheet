@@ -1,0 +1,14 @@
+#!/bin/bash
+#SBATCH -J stereo_hirise_map
+#SBATCH -t 7:00:00:00
+#SBATCH --mem=16G
+#SBATCH -o asp_out
+#SBATCH -e asp_error
+
+./preprocess_hirise.sh
+stereo -s stereo.hirise_map <dir1>*map.cub <dir2>*map.cub <output>
+# use if HiRISE is 25 cm/pix
+point2dem --tr 1 *PC.tif
+# use if HiRISE is 50 cm/pix
+# point2dem --tr 2 *PC.tif
+dem_geoid *DEM.tif
