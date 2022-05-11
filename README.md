@@ -52,8 +52,8 @@ Either script can be fully automated by running `sbatch run_mosaic` in a SLURM w
 
 ## Calibrating HiRISE images
 ```
-wget -r -l1 -nd first_image_directory -A “*RED*IMG”
-wget -r -l1 -nd second_image_directory -A “*RED*IMG”
+wget -r -l1 -nd <dir1> -A “*RED*IMG”
+wget -r -l1 -nd <dir2> -A “*RED*IMG”
 ```
 PDS directory: `https://hirise.lpl.arizona.edu/PDS/EDR/[E/P]SP/ORB_****00_****99/[E/P]SP_******_****`
 
@@ -66,7 +66,7 @@ The `hiedr2mosaic.py` program automates a number of processing steps to combine 
 ```
 cam2map4stereo.py <dir1>_RED.mos_hijitreged.norm.cub <dir2>_RED.mos_hijitreged.norm.cub
 ```
-Proceed as above for CTX, starting after the `./preprocess.sh`. For 25 cm/pix images, use --tr 1; for 50 cm/pix, use --tr 2 in point2dem.
+This is the same function used to map-project CTX ISIS cubes, this time with the calibrated HiRISE cubes that have been stitched together from the individual detectors in the previous step. The processing steps after this are essentially identical to those for CTX; the analogous scripts `preprocess_hirise.sh` and `run_asp_hirise` are provided that use a different HiRISE config file, also from Mayer (2018), found [here](https://github.com/Micascisto/SASP/blob/sasp/config/original/stereo.hirise_map).
 
 ## Exporting images from ArcMap to DERT
 Find the vis/DEM combo you want to use. Clip Raster > set output extent to DEM, check "Maintain Clipping Extent." Right-click clipped raster layer > Export Data > check "Use Renderer" (only if image is not already 8-bit) and set resolution to "Square" at ¼ of DEM resolution (should be very close to the native resolution of the vis image). Once images are in DERT directory, run layerfactory and select DEM first. Leave tile size at default (128). Create a new landscape directory. Re-run layerfactory and select gray image. Set tile size to 4x DEM (512).
