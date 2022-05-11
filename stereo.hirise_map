@@ -1,0 +1,18 @@
+alignment-method none
+force-use-entire-range 
+prefilter-mode 2
+prefilter-kernel-width 1.4
+cost-mode 2
+corr-kernel 25 25
+subpixel-mode 2
+subpixel-kernel 21 21
+
+filter-mode 1
+rm-half-kernel 5 5
+max-mean-diff 3
+rm-min-matches 60
+rm-threshold 3
+rm-cleanup-passes 1
+
+near-universe-radius 0.0
+far-universe-radius 0.0
